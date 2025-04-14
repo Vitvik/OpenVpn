@@ -1,0 +1,136 @@
+sudo bash <(curl -fsS https://packages.openvpn.net/as/install.sh) --yes
+
+
+sudo apt update && sudo apt upgrade -y
+sudo apt install openvpn easy-rsa -y
+
+make-cadir ~/openvpn-ca
+cd ~/openvpn-ca
+
+vim vars
+export KEY_ORG="MyVPN"
+export KEY_OU="MyUnit"
+export KEY_NAME="server"
+
+
+
+./easyrsa init-pki
+./easyrsa build-ca
+./easyrsa gen-req server nopass
+./easyrsa sign-req server server
+./easyrsa gen-dh
+openvpn --genkey secret pki/ta.key
+
+sudo cp pki/ca.crt pki/issued/server.crt pki/private/server.key pki/dh.pem pki/ta.key /etc/openvpn/
+
+sudo vim /etc/openvpn/server.conf
+
+port 1194
+proto udp
+dev tun
+ca /etc/openvpn/ca.crt
+cert /etc/openvpn/server.crt
+key /etc/openvpn/server.key  # Keep this file secret
+dh /etc/openvpn/dh.pem
+tls-auth /etc/openvpn/ta.key 0
+server 10.8.0.0 255.255.255.0
+ifconfig-pool-persist /var/log/openvpn/ipp.txt
+keepalive 10 120
+cipher AES-256-CBC
+auth SHA256
+compress lz4
+persist-key
+persist-tun
+status /var/log/openvpn/openvpn-status.log
+log /var/log/openvpn/openvpn.log
+verb 3
+
+
+Увімкни IP Forwarding, щоб VPN міг передавати трафік:
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+Дозволь трафік через брандмауер:
+sudo ufw allow 1194/udp
+sudo ufw allow OpenSSH
+sudo ufw enable
+
+UTF перевірка
+sudo ufw show added
+sudo ufw status
+
+sudo systemctl start openvpn@server
+sudo systemctl enable openvpn@server
+
+
+для перевірки
+ip a show tun0
+
+
+Генерація клієнтських сертифікатів
+cd ~/openvpn-ca
+./easyrsa build-client-full client1 nopass
+openvpn --genkey secret ~/openvpn-ca/pki/ta.key
+
+
+mkdir -p ~/client-configs/files
+cp pki/ca.crt pki/issued/client1.crt pki/private/client1.key ~/client-configs/files/
+cp ~/openvpn-ca/pki/ta.key ~/client-configs/files/
+
+vim ~/client-configs/files/client1.ovpn
+
+client
+dev tun0
+proto udp
+remote YOUR_SERVER_IP 1194
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+remote-cert-tls server
+auth SHA256
+data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305
+verb 3
+user nobody
+group nogroup
+
+<ca>
+# Встав сюди вміст ca.crt
+</ca>
+
+<cert>
+# Встав сюди вміст client1.crt
+</cert>
+
+<key>
+# Встав сюди вміст client1.key
+</key>
+
+Перевірка підключених клієнтів
+
+sudo cat /var/log/openvpn/status.log
+
+Локально
+scp -i "key.pem" ubuntu@ip_add:/remote/files/client1.ovpn /local/files
+scp -i serv_tren.pem ubuntu@54.74.217.128:/home/ubuntu/client-configs/files/client1.ovpn .
+
+
+sudo apt update && sudo apt install openvpn -y
+
+Підключення до VPN
+sudo openvpn --config client1.ovpn
+
+
+Перевірка підключення
+ip a | grep tun0
+
+curl ifconfig.me
+
+ps aux | grep openvpn
+
+
+Автоматичне підключення при завантаженні (опціонально)
+sudo cp client1.ovpn /etc/openvpn/client.conf
+
+sudo systemctl enable openvpn@client
+sudo systemctl start openvpn@client
