@@ -18,6 +18,5 @@ jobs:
        uses: hashicorp/setup-terraform@v3
      - name: Terraform Init & Apply
        run: |
-          cd terraform
           terraform init
           terraform apply -auto-approve -var="region=${{ github.event.client_payload.region }}"

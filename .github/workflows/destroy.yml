@@ -16,6 +16,5 @@ jobs:
 
       - name: Terraform Init & Destroy
         run: |
-          cd terraform
           terraform init
           terraform destroy -auto-approve -var="region=${{ github.event.client_payload.region }}"
