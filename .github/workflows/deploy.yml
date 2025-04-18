@@ -1,0 +1,23 @@
+name: Deploy EC2 VPN
+
+on:
+  repository_dispatch:
+    types: [deploy-ec2-vpn]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+     - name: Checkout code
+       uses: actions/checkout@v4
+     
+     - name: Print selected region
+       run: echo "Selected region is ${{ github.event.client_payload.region }}"
+
+     - name: Set up Terraform
+       uses: hashicorp/setup-terraform@v3
+     - name: Terraform Init & Apply
+       run: |
+          cd terraform
+          terraform init
+          terraform apply -auto-approve -var="region=${{ github.event.client_payload.region }}"

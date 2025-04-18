@@ -1,0 +1,21 @@
+name: Destroy OpenVPN Server
+
+on:
+  repository_dispatch:
+    types: [destroy-vpn]
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init & Destroy
+        run: |
+          cd terraform
+          terraform init
+          terraform destroy -auto-approve -var="region=${{ github.event.client_payload.region }}"

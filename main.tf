@@ -1,6 +1,15 @@
+variable "region" {
+  type = string
+}
+
+provider "aws" {
+  region = var.region
+}
+/*
 provider "aws" {
   region = "eu-west-1" 
 }
+*/
 
 data "aws_vpc" "default" {
   default = true

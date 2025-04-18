@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>VPN Deployment Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .status-container {
+      position: relative;
+      width: 100%;
+      margin: 0 auto 20px auto;
+      text-align: center;
+    }
+    
+    .login-status {
+      display: inline-block;
+    }
+    
+    .logout-link {
+      position: absolute;
+      right: 30%; 
+      top: 0;
+    }
+    
+    select, button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      /*border: 1px solid #ccc;*/
+      background-color: #f8f8f8;
+      cursor: pointer;
+      min-width: 200px;
+    }
+    
+    button {
+      background-color: #f0f0f0;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .region-selector {
+      margin: 15px 0;
+    }
+    
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .download-container {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🌍 VPN Deployment Panel</h1>
+  </div>
+
+  <div class="status-container">
+    <div class="login-status">
+      <span>✅ Logged in!</span>
+    </div>
+    <a class="logout-link" href="https://eu-west-1q5gnl33xr.auth.eu-west-1.amazoncognito.com/logout?client_id=5nk6n32qpfl3ed93pavpjftc4s&logout_uri=https://d3uvy91t9p31qs.cloudfront.net/index.html">Logout</a>
+  </div>
+
+  <div class="region-selector">
+    <label for="region">Select Region:</label>
+    <select id="region">
+      <option value="us-east-1">N. Virginia (us-east-1)</option>
+      <option value="us-east-2">Ohio (us-east-2)</option>
+      <option value="us-west-1">N. California (us-west-1)</option>
+      <option value="us-west-2">Oregon (us-west-2)</option>
+      <option value="ap-south-1">Mumbai (ap-south-1)</option>
+      <option value="ap-northeast-3">Osaka (ap-northeast-3)</option>
+      <option value="ap-northeast-2">Seoul (ap-northeast-2)</option>
+      <option value="ap-southeast-1">Singapore (ap-southeast-1)</option>
+      <option value="ap-southeast-2">Sydney (ap-southeast-2)</option>
+      <option value="ap-northeast-1">Tokyo (ap-northeast-1)</option>
+      <option value="ca-central-1">Canada (ca-central-1)</option>
+      <option value="eu-central-1">Frankfurt (eu-central-1)</option>
+      <option value="eu-west-1">Ireland (eu-west-1)</option>
+      <option value="eu-west-2">London (eu-west-2)</option>
+      <option value="eu-west-3">Paris (eu-west-3)</option>
+      <option value="eu-north-1">Stockholm (eu-north-1)</option>
+      <option value="sa-east-1">São Paulo (sa-east-1)</option>
+    </select>
+  </div>
+
+  <div class="button-container">
+    <button onclick="deployVPN()">🚀 Deploy VPN Server</button>
+    <button onclick="destroyVPN()">🗑 Destroy VPN Server</button>
+  </div>
+  
+  <div class="download-container">
+    <button onclick="downloadProfile()">⬇ Download .ovpn Profile</button>
+  </div>
+
+  <script>
+    let idToken;
+    
+    window.onload = function () {
+      const clientId = "5nk6n32qpfl3ed93pavpjftc4s"; 
+      const domain = "eu-west-1q5gnl33xr.auth.eu-west-1.amazoncognito.com";
+      const redirectUri = encodeURIComponent("https://d3uvy91t9p31qs.cloudfront.net/");
+
+      idToken = new URLSearchParams(window.location.hash.slice(1)).get('id_token');
+
+      if (!idToken) {
+        console.log("No token found, redirecting to login...");
+        window.location.href = `https://${domain}/login?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}`;
+      } else {
+        console.log("ID Token found");
+      }
+    };
+
+    function deployVPN() {
+      const region = document.getElementById("region").value;
+      const token = new URLSearchParams(window.location.hash.slice(1)).get('id_token');
+
+    fetch("https://1iqiglb0t5.execute-api.eu-west-1.amazonaws.com/deploy", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+    body: JSON.stringify({ region })
+    })
+    .then(response => {
+      if (response.ok) {
+        alert("✅ Deployment initiated!");
+      } else {
+        alert("❌ Deployment failed!");
+      }
+    })
+    .catch(error => {
+      alert("❌ Error: " + error.message);
+    });
+    }
+
+    function destroyVPN() {
+    const region = document.getElementById("region").value;
+    const token = new URLSearchParams(window.location.hash.slice(1)).get("id_token");
+
+    fetch("https://1iqiglb0t5.execute-api.eu-west-1.amazonaws.com/destroy", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ region })
+      })
+      .then(response => response.json())
+      .then(result => {
+      alert(result.message || "✅ Destroy started!");
+      })
+      .catch(error => {
+        alert("❌ Error: " + error.message);
+      });
+    }
+
+    function downloadProfile() {
+      const region = document.getElementById("region").value;
+      window.open(`https://your-api-url/download?region=${region}`, '_blank');
+    }
+  </script>
+</body>
+</html>
