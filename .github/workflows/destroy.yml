@@ -18,10 +18,20 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ github.event.client_payload.region }}
 
+      - name: Print selected region
+        run: echo "Selected region is ${{ github.event.client_payload.region }}"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init & Destroy
+      - name: Terraform Init
         run: |
+          echo "Initializing Terraform..."
           terraform init
+          echo "Terraform initialized successfully"
+
+      - name: Terraform Destroy
+        run: |
+          echo "Destroying resources..."
           terraform destroy -auto-approve -var="region=${{ github.event.client_payload.region }}"
+          echo "Terraform destroy completed"

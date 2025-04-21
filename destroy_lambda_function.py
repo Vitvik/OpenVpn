@@ -4,7 +4,10 @@ import requests
 
 def lambda_handler(event, context):
     try:
-        body = json.loads(event["body"])
+        body = event.get("body", {})
+        if isinstance(body, str):
+            body = json.loads(body)
+            
         region = body.get("region", "eu-west-1")
 
         github_token = os.environ.get("GITHUB_TOKEN")
