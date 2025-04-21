@@ -2,21 +2,36 @@ name: Deploy EC2 VPN
 
 on:
   repository_dispatch:
-    types: [deploy-ec2-vpn]
+    types: [deploy-vpn]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-     - name: Checkout code
-       uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
      
-     - name: Print selected region
-       run: echo "Selected region is ${{ github.event.client_payload.region }}"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ github.event.client_payload.region }}
 
-     - name: Set up Terraform
-       uses: hashicorp/setup-terraform@v3
-     - name: Terraform Init & Apply
-       run: |
+      - name: Print selected region
+        run: echo "Selected region is ${{ github.event.client_payload.region }}"
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init & Apply
+        run: |
           terraform init
           terraform apply -auto-approve -var="region=${{ github.event.client_payload.region }}"
+          terraform output -json > terraform_output.json
+
+      - name: Upload Terraform Output
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-output
+          path: terraform_output.json

@@ -115,6 +115,7 @@
   </div>
 
   <script>
+    
     let idToken;
     
     window.onload = function () {
@@ -131,12 +132,12 @@
         console.log("ID Token found");
       }
     };
-
+    
     function deployVPN() {
       const region = document.getElementById("region").value;
       const token = new URLSearchParams(window.location.hash.slice(1)).get('id_token');
 
-    fetch("https://1iqiglb0t5.execute-api.eu-west-1.amazonaws.com/deploy", {
+    fetch("https://ro8yy2ok66.execute-api.eu-west-1.amazonaws.com/prod/deploy", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -160,7 +161,7 @@
     const region = document.getElementById("region").value;
     const token = new URLSearchParams(window.location.hash.slice(1)).get("id_token");
 
-    fetch("https://1iqiglb0t5.execute-api.eu-west-1.amazonaws.com/destroy", {
+    fetch("https://ro8yy2ok66.execute-api.eu-west-1.amazonaws.com/prod/destroy", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
