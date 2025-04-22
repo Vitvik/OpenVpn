@@ -1,0 +1,15 @@
+---
+# VPN Users
+vpn_users:
+  - Vitvik
+  - Bodia
+
+# S3 Configuration
+s3_bucket: "ovpn-users-files"
+
+# OpenVPN Configuration
+openvpn_port: 1194
+openvpn_proto: udp
+openvpn_dns: "8.8.8.8"
+openvpn_cipher: "AES-256-CBC"
+openvpn_auth: "SHA256"

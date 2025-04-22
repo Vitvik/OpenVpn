@@ -1,0 +1,11 @@
+---
+plugin: amazon.aws.aws_ec2
+regions:
+  - eu-west-1
+filters:
+  tag:Name: VpnOpen_server
+  instance-state-name: running
+hostnames:
+  - private-ip-address
+compose:
+  ansible_host: public_ip_address
