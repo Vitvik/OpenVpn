@@ -13,7 +13,9 @@ Amazon API Gateway
 /deploy
 /destroy
 Lambda Function
--Terraform — створює EC2 у вибраному регіоні
+Terraform — створює EC2 у вибраному регіоні
+S3 - для зберігання terraform.tfstate
+
 
 3 частина
--Ansible — встановлює та налаштовує OpenVPN, додає користувачів та генерує .ovpn файли та копіює їх в S3 
+Ansible — встановлює та налаштовує OpenVPN, додає користувачів та генерує .ovpn файли та копіює їх в S3 

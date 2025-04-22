@@ -27,11 +27,13 @@ jobs:
       - name: Terraform Init
         run: |
           echo "Initializing Terraform..."
+          cd terraform
           terraform init
           echo "Terraform initialized successfully"
 
       - name: Terraform Destroy
         run: |
           echo "Destroying resources..."
+          cd terraform
           terraform destroy -auto-approve -var="region=${{ github.event.client_payload.region }}"
           echo "Terraform destroy completed"

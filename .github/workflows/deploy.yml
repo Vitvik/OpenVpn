@@ -27,12 +27,14 @@ jobs:
       - name: Terraform Init
         run: |
           echo "Initializing Terraform..."
+          cd terraform
           terraform init
           echo "Terraform initialized successfully"
 
       - name: Terraform Apply
         run: |
           echo "Applying Terraform configuration..."
+          cd terraform
           terraform apply -auto-approve -var="region=${{ github.event.client_payload.region }}"
           echo "Terraform apply completed"
           terraform output -json > terraform_output.json
