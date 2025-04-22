@@ -69,7 +69,7 @@ resource "aws_security_group" "vpn_sg" {
 
 
 resource "aws_instance" "VpnOpen_server" {
-  ami           = "ami-0df368112825f8d8f"  
+  ami           = "ami-0d527b8c289b4af7f"  
   instance_type = "t2.micro"
   key_name      = "serv_tren"
 
