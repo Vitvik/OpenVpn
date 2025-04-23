@@ -1,3 +1,4 @@
 ---
 - name: amazon.aws
-  version: ">= 5.0.0"
+  type: collection
+  source: https://galaxy.ansible.com
