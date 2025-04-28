@@ -40,33 +40,56 @@ jobs:
           terraform output -json > terraform_output.json
           cat terraform_output.json
 
+      - name: Wait for EC2 to be ready
+        run: |
+          sleep 30
+
       - name: Install Ansible
         run: |
-            sudo apt-get update
-            sudo apt-get install -y ansible
-  
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
       - name: Configure SSH key
         run: |
-              mkdir -p ~/.ssh
-              echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/serv_tren
-              chmod 600 ~/.ssh/serv_tren
-    
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/serv_tren
+          chmod 600 ~/.ssh/serv_tren
+
       - name: Get EC2 Public IP
         id: get_ip
         run: |
-              cd terraform
-              terraform init
-              IP=$(terraform output -raw public_ip)
-              echo "public_ip=$IP" >> $GITHUB_OUTPUT
-              echo $IP > ../ansible/inventory/server_ip.txt
-    
+          cd terraform
+          IP=$(terraform output -raw server_public_ip)
+          echo "public_ip=$IP" >> $GITHUB_OUTPUT
+          echo $IP > ../ansible/inventory/server_ip.txt
+
+      - name: Verify IP
+        run: |
+          if [ -z "${{ steps.get_ip.outputs.public_ip }}" ]; then
+            echo "Error: IP is empty"
+            exit 1
+          fi
+
       - name: Create inventory file
         run: |
-              cd ansible
-              echo "[vpn_servers]" > inventory/hosts
-              echo "${{ steps.get_ip.outputs.public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/serv_tren" >> inventory/hosts
-    
+          cd ansible
+          echo "[vpn_servers]" > inventory/hosts
+          echo "${{ steps.get_ip.outputs.public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/serv_tren" >> inventory/hosts
+
+      - name: Verify inventory file
+        run: |
+          cd ansible
+          if [ ! -f inventory/hosts ]; then
+            echo "Error: inventory/hosts not found"
+            exit 1
+          fi
+          cat inventory/hosts
+
+      - name: Test SSH connection
+        run: |
+          ssh -i ~/.ssh/serv_tren -o StrictHostKeyChecking=no ubuntu@${{ steps.get_ip.outputs.public_ip }} "echo 'SSH connection successful'"
+
       - name: Run Ansible Playbook
         run: |
-              cd ansible
-              ansible-playbook -i inventory/hosts playbook.yml    
+          cd ansible
+          ansible-playbook -i inventory/hosts playbook.yml    
