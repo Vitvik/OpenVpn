@@ -39,3 +39,34 @@ jobs:
           echo "Terraform apply completed"
           terraform output -json > terraform_output.json
           cat terraform_output.json
+
+      - name: Install Ansible
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y ansible
+  
+      - name: Configure SSH key
+        run: |
+              mkdir -p ~/.ssh
+              echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/serv_tren
+              chmod 600 ~/.ssh/serv_tren
+    
+      - name: Get EC2 Public IP
+        id: get_ip
+        run: |
+              cd terraform
+              terraform init
+              IP=$(terraform output -raw public_ip)
+              echo "public_ip=$IP" >> $GITHUB_OUTPUT
+              echo $IP > ../ansible/inventory/server_ip.txt
+    
+      - name: Create inventory file
+        run: |
+              cd ansible
+              echo "[vpn_servers]" > inventory/hosts
+              echo "${{ steps.get_ip.outputs.public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/serv_tren" >> inventory/hosts
+    
+      - name: Run Ansible Playbook
+        run: |
+              cd ansible
+              ansible-playbook -i inventory/hosts playbook.yml    
