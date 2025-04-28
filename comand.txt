@@ -125,3 +125,21 @@ sudo cp client1.ovpn /etc/openvpn/client.conf
 
 sudo systemctl enable openvpn@client
 sudo systemctl start openvpn@client
+
+
+# Перевірка статусу OpenVPN
+sudo systemctl status openvpn
+
+# Перевірка наявності конфігураційних файлів
+ls -la /etc/openvpn/
+ls -la /etc/openvpn/easy-rsa/pki/
+ls -la /etc/openvpn/clients/
+
+# Перевірка логів
+sudo journalctl -u openvpn
+
+# На сервері
+sudo netstat -tulpn | grep openvpn
+
+# Зовнішня перевірка
+nc -zv <public_ip> 1194
