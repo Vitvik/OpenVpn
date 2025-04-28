@@ -13,26 +13,26 @@
       - unzip
 
 - name: Download AWS CLI installer
-      get_url:
-        url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
-        dest: "/tmp/awscliv2.zip"
+  get_url:
+    url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+    dest: "/tmp/awscliv2.zip"
 
 - name: Unzip AWS CLI installer
-      unarchive:
-        src: "/tmp/awscliv2.zip"
-        dest: "/tmp"
-        remote_src: yes
+  unarchive:
+    src: "/tmp/awscliv2.zip"
+    dest: "/tmp"
+    remote_src: yes
 
 - name: Run AWS CLI installer
-      command: "/tmp/aws/install"
+  command: "/tmp/aws/install"
 
 - name: Verify AWS CLI installation
-      command: "aws --version"
-      register: aws_cli_version
+  command: "aws --version"
+  register: aws_cli_version
 
 - name: Display AWS CLI version
-      debug:
-        msg: "{{ aws_cli_version.stdout }}"        
+  debug:
+    msg: "{{ aws_cli_version.stdout }}"        
 
 - name: Create OpenVPN directory structure
   file:
