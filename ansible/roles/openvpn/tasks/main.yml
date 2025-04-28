@@ -73,4 +73,13 @@
     src: "/etc/openvpn/clients/{{ item }}.ovpn"
     mode: put
   loop: "{{ vpn_users }}"
-  delegate_to: localhost 
+  delegate_to: localhost
+
+- name: Verify OpenVPN installation
+  command: systemctl is-active openvpn
+  register: openvpn_status
+  changed_when: false
+
+- name: Display OpenVPN status
+  debug:
+    msg: "OpenVPN is {{ 'active' if openvpn_status.rc == 0 else 'inactive' }}"   
