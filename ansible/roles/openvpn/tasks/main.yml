@@ -44,10 +44,9 @@
     - /etc/openvpn/clients
 
 - name: Copy EasyRSA
-  copy:
-    src: /usr/share/easy-rsa/
-    dest: /etc/openvpn/easy-rsa/
-    remote_src: yes
+  shell: |
+    cp -r /usr/share/easy-rsa/* /etc/openvpn/easy-rsa/
+    chmod +x /etc/openvpn/easy-rsa/*
 
 - name: Create EasyRSA vars file
   copy:
@@ -60,12 +59,12 @@
       set_var EASYRSA_CERT_EXPIRE    3650
       set_var EASYRSA_NS_SUPPORT     "no"
       set_var EASYRSA_NS_COMMENT     "OpenVPN"
-      set_var EASYRSA_EXT_DIR        "easy-rsa/x509-types"
-      set_var EASYRSA_SSL_CONF       "easy-rsa/openssl-easyrsa.cnf"
+      set_var EASYRSA_EXT_DIR        "x509-types"
+      set_var EASYRSA_SSL_CONF       "openssl-easyrsa.cnf"
       set_var EASYRSA_DN             "org"
       set_var EASYRSA_REQ_CN         "OpenVPN CA"
-      set_var EASYRSA_PKI            "$EASYRSA/pki"
-      set_var EASYRSA_DH_PARAMS      "$EASYRSA_PKI/dh.pem"
+      set_var EASYRSA_PKI            "pki"
+      set_var EASYRSA_DH_PARAMS      "pki/dh.pem"
       set_var EASYRSA_REQ_ALT_NAMES  "no"
       set_var EASYRSA_BATCH          "yes"
     mode: '0644'
@@ -77,14 +76,14 @@
   notify: restart openvpn
 
 - name: Generate certificates
-  command: "{{ item }}"
+  shell: |
+    cd /etc/openvpn/easy-rsa
+    ./easyrsa init-pki
+    ./easyrsa build-ca nopass
+    ./easyrsa gen-dh
+    ./easyrsa build-server-full server nopass
   args:
-    chdir: /etc/openvpn/easy-rsa/
-  loop:
-    - ./easyrsa init-pki
-    - ./easyrsa build-ca nopass
-    - ./easyrsa gen-dh
-    - ./easyrsa build-server-full server nopass
+    chdir: /etc/openvpn/easy-rsa
 
 - name: Create users
   user:
@@ -94,7 +93,7 @@
   loop: "{{ vpn_users }}"
 
 - name: Generate client certificates
-  command: "./easyrsa build-client-full {{ item }} nopass"
+  shell: "./easyrsa build-client-full {{ item }} nopass"
   args:
     chdir: /etc/openvpn/easy-rsa/
   loop: "{{ vpn_users }}"

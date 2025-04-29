@@ -1,3 +1,2 @@
 ---
-collections:
-  - amazon.aws
+# No collections needed for static inventory

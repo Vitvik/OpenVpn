@@ -37,5 +37,6 @@ terraform.rc
 cred.tf
 cred.txt
 lambda_package/
+arh/
 destroy_lambda.zip
 deploy_lambda.zip
