@@ -62,7 +62,6 @@
       set_var EASYRSA_EXT_DIR        "x509-types"
       set_var EASYRSA_SSL_CONF       "openssl-easyrsa.cnf"
       set_var EASYRSA_DN             "org"
-      set_var EASYRSA_REQ_CN         "OpenVPN CA"
       set_var EASYRSA_PKI            "pki"
       set_var EASYRSA_DH_PARAMS      "pki/dh.pem"
       set_var EASYRSA_REQ_ALT_NAMES  "no"
