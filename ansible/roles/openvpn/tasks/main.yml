@@ -109,17 +109,41 @@
     system: yes
   loop: "{{ vpn_users }}"
 
+- name: Verify certificates exist
+  stat:
+    path: "{{ item }}"
+  with_items:
+    - /etc/openvpn/easy-rsa/pki/ca.crt
+    - /etc/openvpn/easy-rsa/pki/private/server.key
+    - /etc/openvpn/easy-rsa/pki/issued/server.crt
+    - /etc/openvpn/easy-rsa/pki/dh.pem
+  register: cert_files
+  failed_when: not cert_files.results[0].stat.exists
+
 - name: Generate client certificates
   shell: "./easyrsa build-client-full {{ item }} nopass"
   args:
     chdir: /etc/openvpn/easy-rsa/
   loop: "{{ vpn_users }}"
+  register: client_certs
+  failed_when: client_certs.rc != 0
+
+- name: Verify client certificates
+  stat:
+    path: "/etc/openvpn/easy-rsa/pki/issued/{{ item }}.crt"
+  with_items: "{{ vpn_users }}"
+  register: client_cert_files
+  failed_when: not client_cert_files.results[0].stat.exists
 
 - name: Generate .ovpn files
   template:
     src: client.ovpn.j2
     dest: "/etc/openvpn/clients/{{ item }}.ovpn"
   loop: "{{ vpn_users }}"
+  vars:
+    ca_cert: "{{ lookup('file', '/etc/openvpn/easy-rsa/pki/ca.crt') }}"
+    client_cert: "{{ lookup('file', '/etc/openvpn/easy-rsa/pki/issued/' + item + '.crt') }}"
+    client_key: "{{ lookup('file', '/etc/openvpn/easy-rsa/pki/private/' + item + '.key') }}"
 
 - name: Upload .ovpn files to S3
   aws_s3:
