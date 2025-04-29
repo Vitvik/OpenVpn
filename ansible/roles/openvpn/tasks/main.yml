@@ -75,15 +75,33 @@
     dest: /etc/openvpn/server.conf
   notify: restart openvpn
 
-- name: Generate certificates
-  shell: |
-    cd /etc/openvpn/easy-rsa
-    ./easyrsa init-pki
-    ./easyrsa build-ca nopass
-    ./easyrsa gen-dh
-    ./easyrsa build-server-full server nopass
+- name: Generate certificates - Init PKI
+  shell: "./easyrsa init-pki"
   args:
     chdir: /etc/openvpn/easy-rsa
+  register: init_pki
+  failed_when: init_pki.rc != 0
+
+- name: Generate certificates - Build CA
+  shell: "./easyrsa build-ca nopass"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+  register: build_ca
+  failed_when: build_ca.rc != 0
+
+- name: Generate certificates - Generate DH
+  shell: "./easyrsa gen-dh"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+  register: gen_dh
+  failed_when: gen_dh.rc != 0
+
+- name: Generate certificates - Build Server
+  shell: "./easyrsa build-server-full server nopass"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+  register: build_server
+  failed_when: build_server.rc != 0
 
 - name: Create users
   user:
