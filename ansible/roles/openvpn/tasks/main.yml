@@ -49,6 +49,27 @@
     dest: /etc/openvpn/easy-rsa/
     remote_src: yes
 
+- name: Create EasyRSA vars file
+  copy:
+    dest: /etc/openvpn/easy-rsa/vars
+    content: |
+      set_var EASYRSA_REQ_OU         "OpenVPN"
+      set_var EASYRSA_KEY_SIZE       2048
+      set_var EASYRSA_ALGO           rsa
+      set_var EASYRSA_CA_EXPIRE      3650
+      set_var EASYRSA_CERT_EXPIRE    3650
+      set_var EASYRSA_NS_SUPPORT     "no"
+      set_var EASYRSA_NS_COMMENT     "OpenVPN"
+      set_var EASYRSA_EXT_DIR        "easy-rsa/x509-types"
+      set_var EASYRSA_SSL_CONF       "easy-rsa/openssl-easyrsa.cnf"
+      set_var EASYRSA_DN             "org"
+      set_var EASYRSA_REQ_CN         "OpenVPN CA"
+      set_var EASYRSA_PKI            "$EASYRSA/pki"
+      set_var EASYRSA_DH_PARAMS      "$EASYRSA_PKI/dh.pem"
+      set_var EASYRSA_REQ_ALT_NAMES  "no"
+      set_var EASYRSA_BATCH          "yes"
+    mode: '0644'
+
 - name: Configure OpenVPN server
   template:
     src: server.conf.j2
