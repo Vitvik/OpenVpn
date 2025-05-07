@@ -1,9 +1,0 @@
----
-- name: Configure OpenVPN Server
-  hosts: vpn_servers
-  become: yes
-  gather_facts: yes
-  vars_files:
-    - roles/openvpn/vars/main.yml
-  roles:
-    - openvpn
