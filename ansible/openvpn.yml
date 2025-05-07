@@ -294,11 +294,15 @@
         label: "{{ item.name }}"
 
     - name: Upload .ovpn files to S3
-      aws_s3:
+      amazon.aws.s3_object:
         bucket: "{{ s3_bucket }}"
         object: "{{ item.name }}.ovpn"
         src: "{{ client_cert_dir }}/{{ item.name }}.ovpn"
         mode: put
+        region: eu-west-1
       loop: "{{ openvpn_users | selectattr('state', 'equalto', 'active') | list }}"
       loop_control:
-        label: "{{ item.name }}"   
+        label: "{{ item.name }}" 
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"    
