@@ -194,6 +194,7 @@
 
 - name: Generate Client Certificates
   hosts: vpn
+  become: true
   vars_files:
     - group_vars/openvpn.yml
 
