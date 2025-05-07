@@ -61,30 +61,15 @@ jobs:
           cd terraform
           IP=$(terraform output -raw server_public_ip)
           echo "public_ip=$IP" >> $GITHUB_OUTPUT
-          echo $IP > ../ansible/inventory/server_ip.txt
-
-      - name: Verify IP
-        run: |
-          if [ -z "${{ steps.get_ip.outputs.public_ip }}" ]; then
-            echo "Error: IP is empty"
-            exit 1
-          fi
+          echo $IP > ../ansible/server_ip.txt
 
       - name: Create inventory file
         run: |
           cd ansible
-          echo "[vpn_servers]" > inventory/hosts
-          echo "${{ steps.get_ip.outputs.public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/serv_tren" >> inventory/hosts
-
-      - name: Verify inventory file
-        run: |
-          cd ansible
-          if [ ! -f inventory/hosts ]; then
-            echo "Error: inventory/hosts not found"
-            exit 1
-          fi
-          cat inventory/hosts
-
+          echo "[vpn]" > inventory.ini
+          echo "${{ steps.get_ip.outputs.public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/serv_tren" >> inventory.ini
+          echo "Inventory file created with public IP: ${{ steps.get_ip.outputs.public_ip }}"
+          
       - name: Test SSH connection
         run: |
           ssh -i ~/.ssh/serv_tren -o StrictHostKeyChecking=no ubuntu@${{ steps.get_ip.outputs.public_ip }} "echo 'SSH connection successful'"
@@ -92,4 +77,4 @@ jobs:
       - name: Run Ansible Playbook
         run: |
           cd ansible
-          ansible-playbook -i inventory/hosts playbook.yml    
+          ansible-playbook -i inventory.ini openvpn.yml

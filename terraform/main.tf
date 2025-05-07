@@ -78,7 +78,18 @@ resource "aws_instance" "VpnOpen_server" {
 
 
   associate_public_ip_address = true
- 
+ /*
+  user_data = <<-EOF
+  #!/bin/bash -ex
+  sudo apt update && sudo apt upgrade -y
+  sudo apt-get install git-all -y
+
+  sudo apt-get install software-properties-common -y
+  sudo add-apt-repository --yes --update ppa:ansible/ansible -y
+  sudo apt install ansible -y
+
+  EOF
+*/
   tags = {
     Name = "OpenVpn-Server"
   }

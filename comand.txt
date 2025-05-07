@@ -1,4 +1,14 @@
 sudo apt update && sudo apt upgrade -y
+sudo apt-get install git-all
+
+sudo apt-get install software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible
+
+git clone https://github.com/Vitvik/OpenVpn
+
+sudo ansible-playbook -i inventory.ini openvpn.yml -vv
+
 sudo apt install openvpn easy-rsa -y
 
 make-cadir ~/openvpn-ca
@@ -105,6 +115,8 @@ sudo cat /var/log/openvpn/status.log
 scp -i "key.pem" ubuntu@ip_add:/remote/files/client1.ovpn /local/files
 scp -i serv_tren.pem ubuntu@54.74.217.128:/home/ubuntu/client-configs/files/client1.ovpn .
 
+scp -i serv_tren.pem ubuntu@18.201.37.67:/etc/openvpn/client-configs/Vitvik.ovpn .
+
 
 sudo apt update && sudo apt install openvpn -y
 
@@ -112,8 +124,10 @@ sudo apt update && sudo apt install openvpn -y
 sudo openvpn --config client1.ovpn
 
 
-Перевірка підключення
+Перевірка 
 ip a | grep tun0
+
+cat /proc/sys/net/ipv4/ip_forward   // sudo sysctl -w net.ipv4.ip_forward=1
 
 curl ifconfig.me
 
@@ -143,3 +157,6 @@ sudo netstat -tulpn | grep openvpn
 
 # Зовнішня перевірка
 nc -zv <public_ip> 1194
+
+
+
