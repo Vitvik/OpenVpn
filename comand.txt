@@ -121,7 +121,7 @@ scp -i serv_tren.pem ubuntu@18.201.37.67:/etc/openvpn/client-configs/Vitvik.ovpn
 sudo apt update && sudo apt install openvpn -y
 
 Підключення до VPN
-sudo openvpn --config client1.ovpn
+sudo openvpn --config Vitvik.ovpn
 
 
 Перевірка 
