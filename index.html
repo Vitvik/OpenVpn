@@ -188,28 +188,34 @@
       });
     }
 
-    async function downloadConfig(username) {
+    async function downloadConfig(username) { 
       try {
-          const response = await fetch(`https://ro8yy2ok66.execute-api.eu-west-1.amazonaws.com/prod/download?username=${username}`);
-          
-          if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${username}.ovpn`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
+        const response = await fetch(`https://ro8yy2ok66.execute-api.eu-west-1.amazonaws.com/prod/download?username=${username}`);
+       
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const blob = await response.blob();
+    
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${username}.ovpn`;
+        document.body.appendChild(link);
+        link.click();
+
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }, 100);
       } catch (error) {
-          console.error('Error downloading config:', error);
-          alert('Error downloading configuration file. Please try again.');
+        console.error("Помилка при завантаженні .ovpn файлу:", error);
+        alert("Помилка при завантаженні конфігурації. Спробуйте ще раз.");
       }
-    }
+
+  }
   </script>
 </body>
 </html>
