@@ -129,6 +129,15 @@
         - name: Generate TLS authentication key (ta.key)
           command: "openvpn --genkey --secret {{ ta_key_file }}"
           when: not ta_key_stat.stat.exists
+          
+    - name: Enable IP forwarding at runtime
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        state: present
+        sysctl_set: yes
+        reload: yes
+        sysctl_file: /etc/sysctl.conf      
 
     - name: Networking forwarding configuration
       block:
