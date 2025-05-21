@@ -35,7 +35,9 @@ jobs:
         run: |
           echo "Applying Terraform configuration..."
           cd terraform
-          terraform apply -auto-approve -var="region=${{ github.event.client_payload.region }}"
+          terraform apply -auto-approve \
+           -var="region=${{ github.event.client_payload.region }}" \
+           -var="public_key=${{ secrets.SSH_PUBLIC_KEY }}"
           echo "Terraform apply completed"
           terraform output -json > terraform_output.json
           cat terraform_output.json

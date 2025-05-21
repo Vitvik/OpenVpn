@@ -83,12 +83,17 @@ resource "aws_security_group" "vpn_sg" {
   }
 }
 
+resource "aws_key_pair" "project_key" {
+  key_name   = "openvpn_ssh"
+  public_key = var.public_key
+}
 
 resource "aws_instance" "VpnOpen_server" {
   #ami           = "ami-0df368112825f8d8f"  
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
-  key_name      = "serv_tren"
+  #key_name      = "serv_tren"
+  key_name      = aws_key_pair.project_key.key_name
 
   subnet_id             = data.aws_subnets.default.ids[0]  
   vpc_security_group_ids = [aws_security_group.vpn_sg.id]
