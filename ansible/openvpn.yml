@@ -137,35 +137,44 @@
         state: present
         sysctl_set: yes
         reload: yes
-        sysctl_file: /etc/sysctl.conf      
+        sysctl_file: /etc/sysctl.conf 
+
+    - name: Get external interface (auto-detect)
+      command: ip route get 1.1.1.1
+      register: default_route
+      changed_when: false     
+
+    - name: Extract interface name
+      set_fact:
+        external_interface: "{{ default_route.stdout | regex_search('dev\\s+(\\w+)', '\\1') }}"      
 
     - name: Networking forwarding configuration
       block:
-        - name: Check if FORWARD rule exists for tun0 to enX0
-          command: iptables -C FORWARD -i tun0 -o enX0 -j ACCEPT
+        - name: Check if FORWARD rule exists for tun0 to external interface
+          command: "iptables -C FORWARD -i tun0 -o {{ external_interface }} -j ACCEPT"
           ignore_errors: true
-          register: forward_tun0_to_enX0_rule
+          register: forward_tun0_to_ext_rule
 
-        - name: Add FORWARD rule for tun0 to enX0
-          command: iptables -A FORWARD -i tun0 -o enX0 -j ACCEPT
-          when: forward_tun0_to_enX0_rule.rc != 0
+        - name: Add FORWARD rule for tun0 to external interface
+          command: "iptables -A FORWARD -i tun0 -o {{ external_interface }} -j ACCEPT"
+          when: forward_tun0_to_ext_rule.rc != 0
 
-        - name: Check if FORWARD rule exists for enX0 to tun0
-          command: iptables -C FORWARD -i enX0 -o tun0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+        - name: Check if FORWARD rule exists for external interface to tun0
+          command: "iptables -C FORWARD -i {{ external_interface }} -o tun0 -m state --state RELATED,ESTABLISHED -j ACCEPT"
           ignore_errors: true
-          register: forward_enX0_to_tun0_rule
+          register: forward_ext_to_tun0_rule
 
-        - name: Add FORWARD rule for enX0 to tun0
-          command: iptables -A FORWARD -i enX0 -o tun0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-          when: forward_enX0_to_tun0_rule.rc != 0
+        - name: Add FORWARD rule for external interface to tun0
+          command: "iptables -A FORWARD -i {{ external_interface }} -o tun0 -m state --state RELATED,ESTABLISHED -j ACCEPT"
+          when: forward_ext_to_tun0_rule.rc != 0
 
         - name: Check if POSTROUTING MASQUERADE rule exists for tun0
-          command: "iptables -t nat -C POSTROUTING -s {{ openvpn_network }}/24 -o enX0 -j MASQUERADE"
+          command: "iptables -t nat -C POSTROUTING -s {{ openvpn_network }}/24 -o {{ external_interface }} -j MASQUERADE"
           ignore_errors: true
           register: postrouting_masquerade_rule
 
         - name: Add POSTROUTING MASQUERADE rule for tun0
-          command: "iptables -t nat -A POSTROUTING -s {{ openvpn_network }}/24 -o enX0 -j MASQUERADE"
+          command: "iptables -t nat -A POSTROUTING -s {{ openvpn_network }}/24 -o {{ external_interface }} -j MASQUERADE"
           when: postrouting_masquerade_rule.rc != 0
 
         - name: Save iptables rules
