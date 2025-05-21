@@ -18,6 +18,22 @@ data "aws_subnets" "default" {
   }
 }
 
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"]
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-noble-24.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+  
+}
+
 resource "aws_security_group" "vpn_sg" {
   name        = "vpn-security-group"
   description = "Security group for OpenVPN"
@@ -69,7 +85,8 @@ resource "aws_security_group" "vpn_sg" {
 
 
 resource "aws_instance" "VpnOpen_server" {
-  ami           = "ami-0df368112825f8d8f"  
+  #ami           = "ami-0df368112825f8d8f"  
+  ami           = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
   key_name      = "serv_tren"
 

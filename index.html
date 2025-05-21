@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>VPN Deployment Panel</title>
   <style>
-    body {
+     body {
       font-family: Arial, sans-serif;
       text-align: center;
       margin-top: 50px;
@@ -34,23 +34,22 @@
       top: 0;
     }
     
-    select, button {
+    select, button, .user-file a {
       padding: 10px 20px;
       margin: 10px;
       font-size: 16px;
       border-radius: 5px;
-      /*border: 1px solid #ccc;*/
-      background-color: #f8f8f8;
+      background-color: #f0f0f0;
       cursor: pointer;
       min-width: 200px;
-    }
-    
-    button {
-      background-color: #f0f0f0;
       transition: background-color 0.3s;
     }
     
-    button:hover {
+    select {
+      background-color: #f8f8f8;
+    }
+    
+    button:hover, .user-file a:hover {
       background-color: #e0e0e0;
     }
     
@@ -67,6 +66,20 @@
     
     .download-container {
       margin-top: 10px;
+    }
+    
+    .user-files {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 15px;
+    }
+      
+    .user-file a {
+      display: inline-block;
+      color: #000000;
+      text-decoration: none;
+      border: 2px solid black;
     }
   </style>
 </head>
@@ -114,18 +127,15 @@
     <h2>Download VPN Configuration</h2>
     <div class="user-files">
       <div class="user-file">
-        <span>Vitvik</span>
-        <button onclick="downloadConfig('Vitvik')">Download Vitvik Config</button>
-      </div>
+        <a href="https://d3uvy91t9p31qs.cloudfront.net/Vitvik.ovpn"> 📥 Download Vitvik Config</a>
+      </div>  
       <div class="user-file">
-        <span>Bodia</span>
-        <button onclick="downloadConfig('Bodia')">Download Bodia Config</button>
+        <a href="https://d3uvy91t9p31qs.cloudfront.net/Bodia.ovpn"> 📥 Download Bogdan Config</a>
       </div>
     </div>
   </div>
 
   <script>
-    
     let idToken;
     
     window.onload = function () {
@@ -187,35 +197,6 @@
           alert("❌ Error: " + error.message);
       });
     }
-
-    async function downloadConfig(username) { 
-      try {
-        const response = await fetch(`https://ro8yy2ok66.execute-api.eu-west-1.amazonaws.com/prod/download?username=${username}`);
-       
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        const blob = await response.blob();
-    
-        const url = URL.createObjectURL(blob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${username}.ovpn`;
-        document.body.appendChild(link);
-        link.click();
-
-        setTimeout(() => {
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        }, 100);
-      } catch (error) {
-        console.error("Помилка при завантаженні .ovpn файлу:", error);
-        alert("Помилка при завантаженні конфігурації. Спробуйте ще раз.");
-      }
-
-  }
   </script>
 </body>
 </html>
