@@ -31,11 +31,22 @@ jobs:
           terraform init
           echo "Terraform initialized successfully"
 
-      - name: Terraform Destroy
+      - name: Terraform Destroy EC2
         run: |
-          echo "Destroying resources..."
+          echo "Destroying EC2 only..."
           cd terraform
           terraform destroy -auto-approve \
-           -var="region=${{ github.event.client_payload.region }}" \
-           -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
-          echo "Terraform destroy completed"
+            -target=aws_instance.VpnOpen_server \
+            -target=aws_security_group.vpn_sg \
+            -var="region=${{ github.event.client_payload.region }}"
+          echo "EC2 destroyed"
+
+      - name: Terraform Destroy SSH Key
+        run: |
+            echo "Destroying SSH Key..."
+            cd terraform
+            terraform destroy -auto-approve \
+              -target=aws_key_pair.project_key \
+              -var="region=${{ github.event.client_payload.region }}" \
+              -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+            echo "SSH Key destroyed"    
