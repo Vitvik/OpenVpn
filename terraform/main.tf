@@ -98,8 +98,9 @@ resource "aws_instance" "VpnOpen_server" {
   subnet_id             = data.aws_subnets.default.ids[0]  
   vpc_security_group_ids = [aws_security_group.vpn_sg.id]
 
-
   associate_public_ip_address = true
+
+  depends_on = [aws_key_pair.project_key]
  /*
   user_data = <<-EOF
   #!/bin/bash -ex

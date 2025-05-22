@@ -37,6 +37,5 @@ jobs:
           cd terraform
           terraform destroy -auto-approve \
            -var="region=${{ github.event.client_payload.region }}" \
-           -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-           -input=false -parallelism=1 -no-color -verbose
+           -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
           echo "Terraform destroy completed"
