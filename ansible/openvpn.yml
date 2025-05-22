@@ -146,7 +146,7 @@
 
     - name: Extract interface name
       set_fact:
-        external_interface: "{{ default_route.stdout | regex_search('dev\\s+(\\w+)', '\\1') }}"      
+        external_interface: "{{ default_route.stdout | regex_search('dev\\s+(\\w+)', '\\1') | first }}"      
 
     - name: Networking forwarding configuration
       block:
